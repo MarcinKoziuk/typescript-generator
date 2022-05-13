@@ -124,6 +124,7 @@ public class Settings {
     public List<Class<? extends Annotation>> optionalAnnotations = new ArrayList<>();
     public List<Class<? extends Annotation>> requiredAnnotations = new ArrayList<>();
     public List<Class<? extends Annotation>> nullableAnnotations = new ArrayList<>();
+    public boolean defaultNullable = false;
     public boolean primitivePropertiesRequired = false;
     public boolean generateInfoJson = false;
     public boolean generateNpmPackageJson = false;
@@ -495,7 +496,7 @@ public class Settings {
 
     public TypeParser getTypeParser() {
         if (typeParser == null) {
-            typeParser = new TypeParser(nullableAnnotations);
+            typeParser = new TypeParser(nullableAnnotations, defaultNullable);
         }
         return typeParser;
     }

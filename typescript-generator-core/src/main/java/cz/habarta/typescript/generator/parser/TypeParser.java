@@ -47,8 +47,8 @@ public class TypeParser {
     private final JavaTypeParser javaTypeParser;
     private final KotlinTypeParser kotlinTypeParser;
 
-    public TypeParser(List<Class<? extends Annotation>> optionalAnnotations) {
-        this.javaTypeParser = new JavaTypeParser(optionalAnnotations);
+    public TypeParser(List<Class<? extends Annotation>> optionalAnnotations, boolean defaultNullable) {
+        this.javaTypeParser = new JavaTypeParser(optionalAnnotations, defaultNullable);
         this.kotlinTypeParser = new KotlinTypeParser(javaTypeParser);
     }
 
@@ -87,9 +87,11 @@ public class TypeParser {
     private static class JavaTypeParser implements LanguageTypeParser {
 
         private final List<Class<? extends Annotation>> optionalAnnotations;
+        private final boolean defaultNullable;
 
-        public JavaTypeParser(List<Class<? extends Annotation>> optionalAnnotations) {
+        public JavaTypeParser(List<Class<? extends Annotation>> optionalAnnotations, boolean defaultNullable) {
             this.optionalAnnotations = optionalAnnotations;
+            this.defaultNullable = defaultNullable;
         }
 
         @Override
@@ -120,7 +122,10 @@ public class TypeParser {
 
         private Type getType(AnnotatedType annotatedType) {
             final Type type = getBareType(annotatedType);
-            if (Utils.hasAnyAnnotation(annotatedType::getAnnotation, optionalAnnotations)) {
+            boolean isPrimitive = Utils.isPrimitiveType(type);
+            if (defaultNullable && !isPrimitive) {
+                return new JTypeWithNullability(type, true);
+            } else if (Utils.hasAnyAnnotation(annotatedType::getAnnotation, optionalAnnotations)) {
                 return new JTypeWithNullability(type, true);
             } else {
                 return type;

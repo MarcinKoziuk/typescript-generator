@@ -117,6 +117,7 @@ public class GenerateTask extends DefaultTask {
     public List<String> optionalAnnotations;
     public List<String> requiredAnnotations;
     public List<String> nullableAnnotations;
+    public boolean defaultNullable;
     public boolean primitivePropertiesRequired;
     public boolean generateInfoJson;
     public boolean generateNpmPackageJson;
@@ -207,6 +208,7 @@ public class GenerateTask extends DefaultTask {
         settings.loadOptionalAnnotations(classLoader, optionalAnnotations);
         settings.loadRequiredAnnotations(classLoader, requiredAnnotations);
         settings.loadNullableAnnotations(classLoader, nullableAnnotations);
+        settings.defaultNullable = defaultNullable;
         settings.primitivePropertiesRequired = primitivePropertiesRequired;
         settings.generateInfoJson = generateInfoJson;
         settings.generateNpmPackageJson = generateNpmPackageJson;

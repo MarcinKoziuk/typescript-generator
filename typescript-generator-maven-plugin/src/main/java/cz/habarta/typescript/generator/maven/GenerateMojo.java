@@ -745,6 +745,9 @@ public class GenerateMojo extends AbstractMojo {
     @Parameter
     private List<String> nullableAnnotations;
 
+    @Parameter
+    private boolean defaultNullable;
+
     /**
      * When using {@link #requiredAnnotations} to mark properties as not optional then
      * setting this parameter to <code>true</code> marks also all properties of primitive type without explicit annotation.
