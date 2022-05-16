@@ -44,6 +44,13 @@ import kotlin.reflect.jvm.ReflectJvmMapping;
 
 public class TypeParser {
 
+    // TODO Make configurable
+    private static final List<String> NONNULL_ANNOTATIONS = Arrays.asList(
+            "javax.annotation.Nonnull",
+            "javax.validation.constraints.NotNull",
+            "javax.validation.constraints.NotEmpty"
+    );
+
     private final JavaTypeParser javaTypeParser;
     private final KotlinTypeParser kotlinTypeParser;
 
@@ -121,9 +128,15 @@ public class TypeParser {
         }
 
         private Type getType(AnnotatedType annotatedType) {
+            return getType(annotatedType, false);
+        }
+
+        private Type getType(AnnotatedType annotatedType, boolean isParametrized) {
             final Type type = getBareType(annotatedType);
             boolean isPrimitive = Utils.isPrimitiveType(type);
-            if (defaultNullable && !isPrimitive) {
+            boolean isCollection = Utils.isCollectionOrMap(type); // TODO make configurable
+            boolean isNonnull = Utils.hasAnyAnnotationDynamic(annotatedType::getAnnotation, NONNULL_ANNOTATIONS);
+            if (defaultNullable && !isParametrized && !isPrimitive && !isCollection && !isNonnull) {
                 return new JTypeWithNullability(type, true);
             } else if (Utils.hasAnyAnnotation(annotatedType::getAnnotation, optionalAnnotations)) {
                 return new JTypeWithNullability(type, true);
@@ -142,7 +155,7 @@ public class TypeParser {
                 final ParameterizedType parameterizedType = (ParameterizedType) type;
                 return new JParameterizedType(
                         parameterizedType.getRawType(),
-                        getTypes(annotatedParameterizedType.getAnnotatedActualTypeArguments()),
+                        getTypes(annotatedParameterizedType.getAnnotatedActualTypeArguments(), true),
                         parameterizedType.getOwnerType());
             }
             if (annotatedType instanceof AnnotatedArrayType) {
@@ -152,10 +165,14 @@ public class TypeParser {
             return type;
         }
 
-        private Type[] getTypes(AnnotatedType[] annotatedTypes) {
+        private Type[] getTypes(AnnotatedType[] annotatedTypes, boolean isParametrized) {
             return Stream.of(annotatedTypes)
-                    .map(annotatedType -> getType(annotatedType))
+                    .map(annotatedType -> getType(annotatedType, isParametrized))
                     .toArray(Type[]::new);
+        }
+
+        private Type[] getTypes(AnnotatedType[] annotatedTypes) {
+            return getTypes(annotatedTypes, false);
         }
 
     }

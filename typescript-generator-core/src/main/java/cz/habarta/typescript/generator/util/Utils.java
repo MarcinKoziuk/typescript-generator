@@ -178,6 +178,23 @@ public final class Utils {
                 .anyMatch(Objects::nonNull);
     }
 
+    public static boolean hasAnyAnnotationDynamic(
+            Function<Class<? extends Annotation>, Annotation> getAnnotationFunction,
+            List<String> annotationClassNames) {
+        return annotationClassNames.stream()
+                .map(str -> {
+                    try {
+                        //noinspection unchecked
+                        return (Class<? extends Annotation>) Class.forName(str);
+                    } catch (ClassNotFoundException|ClassCastException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .map(getAnnotationFunction)
+                .anyMatch(Objects::nonNull);
+    }
+
     public static <T> T getAnnotationElementValue(AnnotatedElement annotatedElement, String annotationClassName, String annotationElementName, Class<T> annotationElementType) {
         final Annotation annotation = getAnnotation(annotatedElement, annotationClassName);
         return getAnnotationElementValue(annotation, annotationElementName, annotationElementType);
@@ -315,6 +332,22 @@ public final class Utils {
         if (type instanceof Class<?>) {
             final Class<?> cls = (Class<?>) type;
             return cls.isPrimitive();
+        }
+        return false;
+    }
+
+    public static boolean isCollectionOrMap(Type type) {
+        if (type instanceof JParameterizedType) {
+            final JParameterizedType jParameterizedType = (JParameterizedType) type;
+            if (jParameterizedType.getRawType() instanceof Class<?>) {
+                final Class<?> cls = (Class<?>) jParameterizedType.getRawType();
+                if (Collection.class.isAssignableFrom(cls)) {
+                    return true;
+                }
+                if (Map.class.isAssignableFrom(cls)) {
+                    return true;
+                }
+            }
         }
         return false;
     }
