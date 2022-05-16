@@ -979,6 +979,7 @@ public class GenerateMojo extends AbstractMojo {
         settings.loadOptionalAnnotations(classLoader, optionalAnnotations);
         settings.loadRequiredAnnotations(classLoader, requiredAnnotations);
         settings.loadNullableAnnotations(classLoader, nullableAnnotations);
+        settings.defaultNullable = defaultNullable;
         settings.primitivePropertiesRequired = primitivePropertiesRequired;
         settings.generateInfoJson = generateInfoJson;
         settings.generateNpmPackageJson = generateNpmPackageJson;
